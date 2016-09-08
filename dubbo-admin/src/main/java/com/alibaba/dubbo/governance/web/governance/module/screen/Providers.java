@@ -7,10 +7,7 @@
  */
 package com.alibaba.dubbo.governance.web.governance.module.screen;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -108,9 +105,9 @@ public class Providers extends Restful {
         }
         
         context.put("providers", providers);
-        
+
         // 设置搜索结果到cookie中
-        setSearchHistroy(context, value);
+        //setSearchHistroy(context, value);
     }
     
     /**
@@ -346,5 +343,69 @@ public class Providers extends Restful {
 		}
     	return true;
     }
-    
+
+	/**
+	 * 批量设置权重为0
+	 *
+	 * @param ids
+	 * @param context
+	 * @return
+	 */
+	public boolean zero(Long[] ids, Map<String, Object> context) {
+		for (Long id : ids) {
+			Provider provider = providerService.findProvider(id);
+			if (provider == null) {
+				context.put("message", getMessage("NoSuchOperationData", id));
+				return false;
+			} else if (!super.currentUser.hasServicePrivilege(provider.getService())) {
+				context.put("message", getMessage("HaveNoServicePrivilege", provider.getService()));
+				return false;
+			}
+		}
+		for (Long id : ids) {
+			providerService.zeroWeightProvider(id);
+		}
+		return true;
+	}
+
+	/**
+	 * 批量设置权重为100
+	 *
+	 * @param ids
+	 * @param context
+	 * @return
+	 */
+	public boolean full(Long[] ids, Map<String, Object> context) {
+		for (Long id : ids) {
+			Provider provider = providerService.findProvider(id);
+			if (provider == null) {
+				context.put("message", getMessage("NoSuchOperationData", id));
+				return false;
+			} else if (!super.currentUser.hasServicePrivilege(provider.getService())) {
+				context.put("message", getMessage("HaveNoServicePrivilege", provider.getService()));
+				return false;
+			}
+		}
+		for (Long id : ids) {
+			providerService.fullWeightProvider(id);
+		}
+		return true;
+	}
+
+	public void list(Provider provider, Map<String, Object> context) {
+		index(provider, context);
+		Object object = context.get("providers");
+		if (object != null) {
+			List<Provider> providers = (List<Provider>) object;
+			List<Long> ids = new ArrayList<Long>(providers.size());
+			for (Provider p : providers) {
+				ids.add(p.getId());
+			}
+			try {
+				response.getWriter().write(org.apache.commons.lang.StringUtils.join(ids, "+"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }

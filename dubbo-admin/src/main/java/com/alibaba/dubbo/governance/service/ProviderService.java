@@ -69,5 +69,17 @@ public interface ProviderService {
     List<String> findMethodsByService(String serviceName);
     
 	Provider findByServiceAndAddress(String service, String address);
-	
+
+    /**
+     * 设置权重为100
+     * @param id
+     */
+    void fullWeightProvider(Long id);
+
+    /**
+     * 设置权重为0
+     * @param id
+     */
+    void zeroWeightProvider(Long id);
+
 }

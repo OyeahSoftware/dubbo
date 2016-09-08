@@ -126,14 +126,14 @@ public class ProviderServiceImpl extends AbstractService implements ProviderServ
     }
     
     public void doublingProvider(Long id) {
-    	setWeight(id, 2F);
+    	setWeight(id, 2F, null);
     }
     
     public void halvingProvider(Long id) {
-    	setWeight(id, 0.5F);
+    	setWeight(id, 0.5F, null);
     }
 
-    public void setWeight(Long id, float factor) {
+    public void setWeight(Long id, float factor, Integer weightValue) {
         if(id == null) {
             throw new IllegalStateException("no provider id");
         }
@@ -147,7 +147,7 @@ public class ProviderServiceImpl extends AbstractService implements ProviderServ
 	        //保证disable的override唯一
 	        List<Override> overrides = overrideService.findByServiceAndAddress(oldProvider.getService(), oldProvider.getAddress());
 	        if (overrides == null || overrides.size() == 0) {
-	        	int value = getWeight(weight, factor);
+	        	int value = weightValue != null ? weightValue : getWeight(weight, factor);
 	        	if (value != Constants.DEFAULT_WEIGHT) {
 		        	Override override = new Override();
 		        	override.setAddress(oldProvider.getAddress());
@@ -163,7 +163,7 @@ public class ProviderServiceImpl extends AbstractService implements ProviderServ
 		        	if (overrideWeight == null || overrideWeight.length() == 0) {
 		        		overrideWeight = weight;
 		        	}
-		        	int value = getWeight(overrideWeight, factor);
+		        	int value = weightValue != null ? weightValue : getWeight(overrideWeight, factor);
 		        	if (value == getWeight(weight, 1)) {
 		        		params.remove(Constants.WEIGHT_KEY);
 		        	} else {
@@ -178,8 +178,8 @@ public class ProviderServiceImpl extends AbstractService implements ProviderServ
 		        }
 	        }
         } else {
-        	int value = getWeight(weight, factor);
-        	if (value == Constants.DEFAULT_WEIGHT) {
+            int value = weightValue != null ? weightValue : getWeight(weight, factor);
+            if (value == Constants.DEFAULT_WEIGHT) {
         		map.remove(Constants.WEIGHT_KEY);
         	} else {
         		map.put(Constants.WEIGHT_KEY, String.valueOf(value));
@@ -456,5 +456,12 @@ public class ProviderServiceImpl extends AbstractService implements ProviderServ
             return new Pair<Long, URL>(key, ret.get(key));
         }
     }
-    
+
+    public void fullWeightProvider(Long id) {
+        setWeight(id, 0F, 100);
+    }
+
+    public void zeroWeightProvider(Long id) {
+        setWeight(id, 0F, 0);
+    }
 }
