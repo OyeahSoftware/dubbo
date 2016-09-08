@@ -1,3 +1,4 @@
+#调用本脚本的示例命令:sh dubbo-weight.sh zero 192.168.40.204:20881
 #/bin/bash
 
 if [ "${1}" = "" ]; then
